@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    
+    <!-- FORM VIEW: The detailed view when you open one order -->
+    <record id="view_printing_custom_order_form" model="ir.ui.view">
+        <field name="name">printing.custom.order.form</field>
+        <field name="model">printing.custom.order</field>
+        <field name="arch" type="xml">
+            <form string="Custom Print Order">
+                <!-- Header with status and buttons -->
+                <header>
+                    <button name="action_confirm" string="Confirm" 
+                            type="object" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_start_production" string="Start Production" 
+                            type="object" class="oe_highlight"
+                            invisible="state != 'confirmed'"/>
+                    <button name="action_mark_done" string="Mark Done" 
+                            type="object" class="oe_highlight"
+                            invisible="state != 'production'"/>
+                    <button name="action_cancel" string="Cancel" 
+                            type="object"
+                            invisible="state in ('done', 'cancel')"/>
+                    <button name="action_reset_to_draft" string="Reset to Draft" 
+                            type="object"
+                            invisible="state != 'cancel'"/>
+                    <field name="state" widget="statusbar" 
+                           statusbar_visible="draft,confirmed,production,done"/>
+                </header>
+                
+                <sheet>
+                    <!-- Title -->
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" readonly="1"/>
+                        </h1>
+                    </div>
+                    
+                    <group>
+                        <group string="Order Information">
+                            <field name="customer_id"/>
+                            <field name="product_id"/>
+                            <field name="quantity"/>
+                        </group>
+                        <group string="Pricing">
+                            <field name="base_price" readonly="1"/>
+                            <field name="customization_fee" readonly="1"/>
+                            <field name="total_price" readonly="1" 
+                                   widget="monetary" 
+                                   class="oe_subtotal_footer_separator"/>
+                        </group>
+                    </group>
+                    
+                    <notebook>
+                        <page string="Customization">
+                            <group>
+                                <group string="Text &amp; Color">
+                                    <field name="custom_text"/>
+                                    <field name="custom_color"/>
+                                    <field name="custom_color_code" 
+                                           invisible="custom_color != 'custom'"/>
+                                </group>
+                                <group string="Size &amp; Design">
+                                    <field name="size"/>
+                                    <field name="design_filename" invisible="1"/>
+                                    <field name="design_file" filename="design_filename"/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Notes">
+                            <field name="notes" placeholder="Add special instructions..."/>
+                        </page>
+                    </notebook>
+                </sheet>
+                
+                <!-- Chatter: for messages and activity -->
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    
+    <!-- TREE VIEW: The list view showing all orders -->
+    <record id="view_printing_custom_order_tree" model="ir.ui.view">
+        <field name="name">printing.custom.order.tree</field>
+        <field name="model">printing.custom.order</field>
+        <field name="arch" type="xml">
+            <tree string="Custom Orders">
+                <field name="name"/>
+                <field name="customer_id"/>
+                <field name="product_id"/>
+                <field name="quantity"/>
+                <field name="total_price" sum="Total"/>
+                <field name="state" 
+                       decoration-success="state == 'done'"
+                       decoration-info="state == 'production'"
+                       decoration-warning="state == 'confirmed'"
+                       decoration-muted="state == 'cancel'"
+                       widget="badge"/>
+            </tree>
+        </field>
+    </record>
+    
+    <!-- SEARCH VIEW: Filters and grouping -->
+    <record id="view_printing_custom_order_search" model="ir.ui.view">
+        <field name="name">printing.custom.order.search</field>
+        <field name="model">printing.custom.order</field>
+        <field name="arch" type="xml">
+            <search string="Search Custom Orders">
+                <field name="name"/>
+                <field name="customer_id"/>
+                <field name="product_id"/>
+                <filter string="Draft" name="draft" 
+                        domain="[('state', '=', 'draft')]"/>
+                <filter string="In Production" name="production" 
+                        domain="[('state', '=', 'production')]"/>
+                <filter string="Done" name="done" 
+                        domain="[('state', '=', 'done')]"/>
+                <group expand="0" string="Group By">
+                    <filter string="Customer" name="customer" 
+                            context="{'group_by': 'customer_id'}"/>
+                    <filter string="Status" name="state" 
+                            context="{'group_by': 'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+    
+    <!-- ACTION: Opens the views -->
+    <record id="action_printing_custom_order" model="ir.actions.act_window">
+        <field name="name">Custom Orders</field>
+        <field name="res_model">printing.custom.order</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first custom print order!
+            </p>
+        </field>
+    </record>
+    
+    <!-- MENU ITEMS -->
+    <menuitem id="menu_printing_custom_root" 
+              name="Print Customization" 
+              sequence="10"/>
+    
+    <menuitem id="menu_printing_custom_orders" 
+              name="Custom Orders" 
+              parent="menu_printing_custom_root" 
+              action="action_printing_custom_order" 
+              sequence="1"/>
+    
+    <!-- SEQUENCE: For automatic order numbering -->
+    <record id="seq_printing_custom_order" model="ir.sequence">
+        <field name="name">Custom Print Order Sequence</field>
+        <field name="code">printing.custom.order</field>
+        <field name="prefix">PRINT/</field>
+        <field name="padding">5</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+    
+</odoo>

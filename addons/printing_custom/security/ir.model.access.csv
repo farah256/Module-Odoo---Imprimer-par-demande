@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_printing_custom_order_user,printing.custom.order.user,model_printing_custom_order,base.group_user,1,1,1,0
+access_printing_custom_order_manager,printing.custom.order.manager,model_printing_custom_order,base.group_system,1,1,1,1
